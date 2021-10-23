@@ -1,3 +1,6 @@
+import  './stylesheets/style.css'
+import  './stylesheets/mystyles.css'
+
 console.log("Webpack Working!!!");
 // Default parameters ES6/2015
 let show = (m = "hola") => {
@@ -15,7 +18,7 @@ function resolveAfter2Seconds(){
 }
 
 async function asyncCall() {
-    console.log("Calling an async funtion");
+    console.log("Calling an async function");
     const result = await resolveAfter2Seconds();
     console.log(result);    
 }
