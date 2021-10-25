@@ -4,13 +4,13 @@ import express from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
-import winston from 'winston';
+import winston from '@server/config/winston';
 
 import indexRouter from '@s-routes/index';
 import usersRouter from '@s-routes/users';
 
 // Importing configurations
-import configTemplateEngine from '@s-config/template-engine'
+import configTemplateEngine from '@s-config/template-engine';
 
 // Webpack Modules
 import webpack from 'webpack';
@@ -18,13 +18,13 @@ import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import webpackDevConfig from '../webpack.dev.config';
 
-//consultar el modo en que se esta ejecutando la aplicacion
-const env = process.env.NODE_ENV || 'development';
+// Consultar el modo en que se esta ejecutando la aplicacion
+const env = process.env.NODE_ENV || 'developement';
 
-//se crea la aplicacion express
+// Se crea la aplicacion express
 const app = express();
 
-//Verificando el modo de ejecucion de la aplicacion
+// Verificando el modo de ejecucion de la aplicacion
 if (env === 'development') {
   console.log('> Excecuting in Development Mode: Webpack Hot Reloading');
   // Paso 1. Agregando la ruta del HMR
@@ -49,6 +49,7 @@ if (env === 'development') {
       publicPath: webpackDevConfig.output.publicPath,
     }),
   );
+
   // Paso 5. Agregando el Webpack Hot middleware
   app.use(webpackHotMiddleware(compiler));
 } else {
@@ -68,16 +69,26 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
+  // Log
+  winston.error(
+    `Code: 404 Message: Page Not Found, URL: ${req.originalUrl}, Method: ${req.method}`,
+  );
   next(createError(404));
 });
 
 // error handler
 app.use((err, req, res) => {
   // set locals, only providing error in development
- res.locals.message = err.message;
- res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
 
+  //  Loggeando con winston
+  winston.error(
+    `status: ${err.status || 500}, Message: ${err.message}, Method: ${
+      req.method
+    }, IP: ${req.ip}`,
+  );
   // render the error page
   res.status(err.status || 500);
   res.render('error');

@@ -64,7 +64,7 @@ const logger = winston.createLogger({
     new winston.transports.File(options.infoFile),
     new winston.transports.File(options.warnFile),
     new winston.transports.File(options.errorFile),
-    new winston.transports.Console(options.Console),
+    new winston.transports.Console(options.console),
   ],
   exitOnError: false,
 });
