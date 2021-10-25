@@ -1,4 +1,5 @@
-import createError  from 'http-errors';
+/* eslint-disable no-console */
+import createError from 'http-errors';
 import express from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
@@ -8,41 +9,45 @@ import indexRouter from '@s-routes/index';
 import usersRouter from '@s-routes/users';
 
 // Webpack Modules
-import webpack  from 'webpack';
+import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
-import webpackConfig from '../webpack.dev.config';
 import webpackDevConfig from '../webpack.dev.config';
 
 //consultar el modo en que se esta ejecutando la aplicacion
 const env = process.env.NODE_ENV || 'development';
 
 //se crea la aplicacion express
-var app = express();
+const app = express();
 
 //Verificando el modo de ejecucion de la aplicacion
-if(env === 'development'){
+if (env === 'development') {
   console.log('> Excecuting in Development Mode: Webpack Hot Reloading');
   // Paso 1. Agregando la ruta del HMR
-  // reload=true: Habilita la recarga del frontend cuando hay cambios en el codigo 
+  // reload=true: Habilita la recarga del frontend cuando hay cambios en el codigo
   // fuente del frontend
   // timeout=1000: tiempo de espera entre recarga y recarga de la pagina
-  webpackConfig.entry = ['webpack-hot-middleware/client?reload=true&timeout=1000', webpackConfig.entry];
+  webpackDevConfig.entry = [
+    'webpack-hot-middleware/client?reload=true&timeout=1000',
+    webpackDevConfig.entry,
+  ];
 
   // Paso 2. Agregamos el plugin
-  webpackConfig.plugins.push(new webpack.HotModuleReplacementPlugin());
+  webpackDevConfig.plugins.push(new webpack.HotModuleReplacementPlugin());
 
   // Paso 3. Crear el compilador de webpack
-  const compiler = webpack(webpackConfig);
+  const compiler = webpack(webpackDevConfig);
 
   // Paso 4.  Agregando el middleware a la cadena de Middleware
   // de nuestra aplicacion.
-  app.use(webpackDevMiddleware(compiler,{
-    publicPath: webpackDevConfig.output.publicPath
-  }));
+  app.use(
+    webpackDevMiddleware(compiler, {
+      publicPath: webpackDevConfig.output.publicPath,
+    }),
+  );
   // Paso 5. Agregando el Webpack Hot middleware
   app.use(webpackHotMiddleware(compiler));
-}else{
+} else {
   console.log('> Executing in Production Mode ...');
 }
 
@@ -60,15 +65,15 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use((err, req, res) => {
   // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+ res.locals.message = err.message;
+ res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   // render the error page
   res.status(err.status || 500);
